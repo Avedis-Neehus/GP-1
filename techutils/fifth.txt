@@ -1,0 +1,43 @@
+def wellenlänge(delta,ordnung, g):
+    a = 5 #meter
+    delta *= 10**-3
+    g = g*10**-3
+    lamm = (g*delta)/(ordnung*a)
+    return sym.latex(str(lamm))
+
+def spaltbreite(d, ordnung = 1, error = 0):
+    a = 5 #meter
+    m = ordnung
+    d = u(d*10**-3, error*10**-3)
+    lamm = 632.8*10**-9
+    b = (2*m*lamm*a)/d
+    return b
+
+
+# Minimaabstände für ersten beiden Doppelspälte
+eins = np.array([30.68,60.6/2,30.87,59.5/2])
+meaneins = np.mean(eins)
+#Spaltenbreite für für ersten beiden Doppelspälte
+b_eins = spaltbreite(meaneins).n
+b_eins_fehler =  spaltbreite(meaneins, error = sigma(eins, dig = 2)).s
+#theoretische Wellenlänge 
+lamm = wellenlänge(2.533,1,1.24)
+
+def einspalt(alf,b = 2*10**-4):
+    alf = (alf*10**-3)/5 #umrechnung des winkels zu abstand
+    g = (np.pi * b)/(632.8 * 10**-9)
+    return (np.sin(g*np.sin(alf))/(g*np.sin(alf)))**2
+
+def zweipalt(alf,g =1.24 *10**-3):
+    
+    alf = (alf*10**-3)/5
+    a = (np.pi * g)/(632.8 * 10**-9)  
+    return np.cos(a*np.sin(alf))**2    
+
+a = np.linspace(-40,40, num = 500)
+plt.plot(a,einspalt(a),'b',label = 'Einzelspaltbeugung')
+plt.plot(a,zweipalt(a),'r',label = 'Interferenz', alpha = 0.3)
+plt.plot(a,einspalt(a)*zweipalt(a),'g',label = 'Doppelspaltbeugung')
+plt.xlabel('Abstand zum Mittelpunkt x in mm')
+plt.ylabel(r'relative Intensität $I/I_0$')
+plt.legend(loc='upper right')

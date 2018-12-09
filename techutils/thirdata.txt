@@ -1,0 +1,137 @@
+FeWT=  4*[21.0]   
+FeWt = [i/2 for i,_ in enumerate(FeWT)]
+
+FeT = [23.2,25.4,25.7,25.7,25.7,25.7,25.7,25.7,25.6]
+Fet =  [2+i/2 for i,_ in enumerate(FeT)] 
+
+
+CuWT = 4*[25.4]+[25.3]
+CuWt = [i/2 for i,_ in enumerate(CuWT)]
+
+CuT = [26.7,27.8,28.3,28.4,27.8,28,28.1,28.2,28.2,28.3,28.3,28.3,28.3]
+Cut =  [len(CuWT)/2+i/2 for i,_ in enumerate(CuT)]
+
+MsWT = 2*[28.1]+3*[28.0]
+MsWt = [i/2 for i,_ in enumerate(MsWT)]
+
+MsT = [28.6,30.1,30.8,30.9,31,31.1,31.2,31.2,31.2,31.2]
+Mst =  [len(MsWT)/2 +i/2 for i,_ in enumerate(MsT)]
+
+
+AlWT = [34.4,34.3,34.2,34.0,33.9,33.7,33.5,33.4,33.3,33.1,33.0]
+AlWt = [i/2 for i,_ in enumerate(AlWT)]
+
+AlT = [34.1,34.2,34.3,34.4,34.5,34.6,34.8,34.9,35.0,35.1,35.1]
+Alt =  [len(AlT)/2 +0.5 +i/2 for i,_ in enumerate(AlT)]
+
+def spez(m,t,tw):
+    cw = 4.182 
+    cal = 0.8969
+    mw = u(478.2,0.2)
+    mk = u(416.1,0.1)
+    m = u(m, 0.1)
+    t = u(t, 0.1)
+    tw = u(tw, 0.1)
+    
+    Q =  (cw*mw+cal*mk)*(t-tw)
+    return Q/(m*(100-t))
+
+#Eisen spez(325,25.7,20.6)   0.45 
+#Al    spez(118.3,35.1,32)   0.8969
+#Ms    spez(351.7,27.9,31.8) 
+#Cu    spez(371.1,28.3,25.3) 0.384
+
+def alpha(delta):
+    
+    return u(delta,0.01)/(u(500,1)*u(79, 0.1))
+
+deltas = np.array([0.87,0.52,0.40,0.45])
+Schmelz = np.array([660,1000, 1535, 1083] )
+
+
+alphas = np.array(list(map(alpha, deltas)) )
+
+grun = np.array([a*s for a,s in zip(alphas,Schmelz)])
+
+lit = np.array([2.31,1.85, 1.18, 1.65])
+dehn = np.array([deltas, alphas, lit, grun])
+
+
+tabelize(dehn.T, rowlab = ['Aluminium', 'Messing', 'Eisen','Kupfer'], collab = ['',r'$\delta l$ in $mm$', r'\alpha in $10^{-5}$°$C^{-1}$', 'Literaturwert', r'$\alpha T_s$']) 
+
+       
+def Al():
+    
+    waterfit = np.poly1d(np.polyfit(AlWt,AlWT,1))
+    mixfit = (np.poly1d(np.polyfit(Alt[9:],AlT[9:],1)))
+
+    plt.plot(np.arange(0,9), waterfit(np.arange(0,9)),'b--',np.arange(8,13),mixfit(np.arange(8,13)),'r--')
+    plt.plot(AlWt,AlWT,'bo',label = 'Wassertemperatur')
+    plt.plot(Alt, AlT, 'ro', label = 'Mischtemperatur')
+    
+    plt.title('Aluminium')
+    plt.text(9.8,34.5, r'$ \overline{t} = 35.1$', color = 'red')
+    plt.text(8,32, r'$T_w = 32.1$', color = 'blue')
+    plt.axvline(8,color = 'gray', linestyle = '--')
+    plt.xlabel('Zeit $t$ in Minuten')
+    plt.ylabel('Temperatur $T$ in °C')
+    plt.legend(loc='upper left')
+
+  
+def Ms():
+  
+    waterfit = np.poly1d(np.polyfit(MsWt,MsWT,1))
+    mixfit = (np.poly1d(np.polyfit(Mst[7:],MsT[7:],1)))
+    
+    
+    plt.title('Messing')
+    plt.axvline(4,color = 'gray', linestyle = '--')
+    
+    plt.text(6,28, r'$ T_w = 27.9$', color = 'blue')
+    plt.text(5.5,30.5, r'$\overline{t} =  31.2$', color = 'red')
+    plt.plot(np.arange(0,5), waterfit(np.arange(0,5)),'b--',np.arange(4,8),mixfit(np.arange(4,8)),'r--')
+    plt.plot(MsWt,MsWT,'bo',label = 'Wassertemperatur')
+    plt.plot(Mst, MsT, 'ro', label = 'Mischtemperatur')
+    plt.xlabel('Zeit $t$ in Minuten')
+    plt.ylabel('Temperatur $T$ in °C')
+    plt.legend(loc='upper left')
+    
+   
+def Cu():
+    
+    waterfit = np.poly1d(np.polyfit(CuWt,CuWT,1))
+    mixfit = (np.poly1d(np.polyfit(Cut[9:],CuT[9:],1)))    
+    
+    
+    
+    plt.title('Kupfer')
+    plt.axvline(4,color = 'gray', linestyle = '--')
+    
+    plt.text(7,25.25, r'$ T_w = 25.2$', color = 'blue')
+    plt.text(7.25,28, r'$\overline{t} =  28.3$', color = 'red')
+    plt.plot(np.arange(0,5), waterfit(np.arange(0,5)),'b--',np.arange(4,10),mixfit(np.arange(4,10)),'r--')
+    plt.plot(CuWt,CuWT,'bo',label = 'Wassertemperatur')
+    plt.plot(Cut, CuT, 'ro', label = 'Mischtemperatur')
+    plt.xlabel('Zeit $t$ in Minuten')
+    plt.ylabel('Temperatur $T$ in °C')
+    plt.legend(loc='center right')
+
+def Fe():
+    
+    waterfit = np.poly1d(np.polyfit(FeWt,FeWT,1))
+    mixfit = (np.poly1d(np.polyfit(Fet[2:-1],FeT[2:-1],1)))    
+    
+    plt.title('Eisen')
+    
+    plt.plot(np.linspace(0,2.2), waterfit(np.linspace(0,2.2)),'b--',np.arange(2,7),mixfit(np.arange(2,7)),'r--')
+    
+    plt.text(2,21.2, r'$ T_w = 21.0$', color = 'blue')
+    plt.text(4,25, r'$\overline{t} =  25.6$', color = 'red')
+    
+    plt.axvline(2.2,color = 'gray', linestyle = '--')
+    
+    plt.plot(FeWt,FeWT,'bo',label = 'Wassertemperatur')
+    plt.plot(Fet, FeT, 'ro', label = 'Mischtemperatur')
+    plt.xlabel('Zeit $t$ in Minuten')
+    plt.ylabel('Temperatur $T$ in °C')
+    plt.legend(loc='lower right')

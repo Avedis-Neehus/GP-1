@@ -1,0 +1,21 @@
+one = [[0,0,2,0,0,1,4,0,0,3,0,0,0],
+      [0,0,0,0,3,1,2,0,0,1,2,0,0],
+      [0,0,1,0,2,1,4,1,1,0,0,0,0]]
+
+two = np.array([[-2,-1,-1,-1,-1,-1,0,1,3,3],
+        [-5,-3,-3,-1,0,0,0,0,1,4],
+        [-6,-5,-3,-1,0,1,1,2,2,3],
+        [-6,-6,-3,-1,0,2,3,3,3,5]]).transpose()
+
+tree = [2,1,1,2,7,7,17,14,14,4,1,3,1]
+
+fore = [6,7,14,25,29,31,43,33,29,24,21,11,1]
+
+klasse = np.arange(-6,7)
+Kugeln =  list(map(lambda x : int(round(1*x,0)), fore))
+
+tabtwo = data(two,ddof = 1)
+tabtree = data(klasse, weights = tree, ddof = 1)
+tabfor = data(klasse, weights = fore, ddof = 1)
+
+ttwostats = [tabtwo.mean, map(lambda x: round(x,2), tabtwo.std)]

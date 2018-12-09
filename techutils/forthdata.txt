@@ -1,0 +1,73 @@
+class sam:
+    
+    sa = [71.1,86.0,91.0,68.4,54.5]
+    sb = [131.6]*5
+    
+    da = [79.8,96.4,101.1,78.1,64.0]
+    db = [124.0,123.4,123.2,124.0,124.1]
+    
+    
+    sa = np.array(sa)
+    sb = np.array(sb)
+    
+    da = np.array(da)
+    db = np.array(add(db, -0.5))
+    
+    s = add(sb - sa,-1.4)
+    e = db - da
+
+class streu:
+    
+    sa = np.array([14.1,8.3,20.0,0.5,5.0])
+    sb = np.array([91.1]*5)
+    
+    dzb = np.array([60.0, 60.1,59.8,60.2,57.6])
+    dza = np.array([39.1,35.1,45.4,27.0,26.8])
+    
+    dsa = np.array([44.3,40.0,51.1,31.3,31.8])
+    dsb = np.array([71.5,77.7,71.5,69.5,64.5])        
+
+    da = dza + (dsa-dza)/2
+    db = dzb + (dsb - dzb)/2
+    
+    s = add(sb - sa,-1.4)     
+    e = db -da
+    
+lk =  u(50.9 +1.6, 0.2) - u(24.1-1.6, 0.2)  
+#lkb = u()
+@listify
+def brenn(s,e):
+    
+    s = u(s, 0.14)
+    e = u(e, 0.2)
+    
+    f = (s**2-e**2)/(4*s)
+    return f.n
+
+@listify
+def streubrenn(f):
+    return (70*f)/(70 - f)
+
+#print(streu.da,streu.db)
+#print(np.std(brenn(streu.s, streu.e), ddof = 1))
+print(streubrenn(brenn(streu.s, streu.e)))
+#tabelize([streubrenn(brenn(streu.s, streu.e))])
+#tabelize(np.array([sam.s,sam.e,brenn(sam.s, sam.e)]).T, collab = [r'$s \pm 0.2$ in cm', r'$e \pm 0.2$ in cm', r'$f \pm 0.2$ in cm'  ]) 
+#tabelize(np.array([streu.s,streu.e,brenn(streu.s, streu.e)]).T, collab = [r'$s \pm 0.2$ in cm', r'$e \pm 0.2$ in cm', r'$f \pm 0.2$ in cm'  ])     
+@listify
+def Pik(f):
+    return (f/30)/(f+30)
+@listify
+def Piku(f):
+    return (f/30)/(5*f+30)
+@listify
+def Pig(f):
+    return (f/30)/(f-30)
+
+a = np.arange(30,130)
+plt.plot(a,Pik(a),'b',label = 'Kepler')
+plt.plot(a,Piku(a),'r',label = 'Kepler mit Umkehrlinse')
+plt.plot(a,Pig(a),'g',label = 'Galilei')
+plt.xlabel('Brennweite des Objektivs in cm')
+plt.ylabel(r'Längeneffektivität $\Pi$')
+plt.legend(loc='upper right')

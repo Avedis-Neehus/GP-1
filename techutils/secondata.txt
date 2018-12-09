@@ -1,0 +1,31 @@
+air = np.array([[92,85,74,67,56,46,38,29,19], [87,76,67,59,49,39,29,20,10,0]])
+
+arg = np.array([[79,69,60,52,43,33,23,14,5,-4],[69,60,51,42,33,24,14,5,-4,-13]])
+
+cole = np.array([64,55,46,39,31,24,17,9,2,-6])#,[39,30,23,15,7,0,-43]])
+
+sample= np.array([60,60,57,49,60,61,56,53,65,56])
+samplet = runde(sample*1000/44100)
+samplev = runde(0.436/(sample/44100), 0)
+sampletable = np.array([sample,samplet,samplev])
+#collab = ['sample',r'$\Delta t in ms$']
+
+lambdas = [8,16,25,33,42,50]
+lambdad = np.diff(lambdas)
+lambdav = lambdad*40
+
+aird = np.array([np.diff(air[0])*(-1),np.diff(air[1])*(-1)])
+airv = aird*35
+
+argd = np.diff(arg)*(-1)
+argv = argd*35
+
+coled = np.diff(cole)*(-1)
+colev = coled*35
+
+
+rowlab = [r'$\Delta d$ in mm',r'$v$ in $m/s$',r'$\Delta d$ in mm',r'$v$ in $m/s$']
+
+airtable = [aird[0],airv[0],aird[1],airv[1]]
+argtable = [argd[0],argv[0],argd[1],argv[1]]
+coletable = [coled, colev]

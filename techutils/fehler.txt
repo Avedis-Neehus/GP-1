@@ -1,0 +1,41 @@
+#@errify('\\lambda', 'd', 'g', ordnung = 'm')
+def wellenlänge(delta,g,ordnung = 1):
+    a = 5 #meter
+   # delta *= 10**-3
+   # g = g*10**-3
+    
+    lamm = (g*delta)/(ordnung*a)
+    return lamm
+#wellenlänge(Q_('1.24mm').plus_minus(.1), Q_('3mm').plus_minus(.2), ordnung = Q_(1))
+
+@errify('c_p','m_p','t', 't_w', cw= 'c_w',cal = 'c_al',mw = 'm_w',mk = 'm_k', tp = 't_p' )
+def spez(m,t,tw,
+    cw = 4.182*ur.joule/(ur.gram*ur.kelvin), 
+    cal = 0.8969*ur.joule/(ur.gram*ur.kelvin),
+    mw = Q_('478.2g').pm(0.2),#u(478.2,0.2)*ur.gram,
+    mk = Q_('416.1g').pm(0.1),#u(416.1,0.1)*ur.gram,          
+    tp = 100*ur.kelvin):
+    
+    Q =  (cw*mw+cal*mk)*(t-tw)
+    return Q/(m*(tp-t))
+spez(Q_('325g').pm(0.1),Q_('25.7K').pm(0.1),Q_('20.6K').pm(0.1))
+@errify('\\alpha','\\Delta l', lz = 'l_z', t = '\\Delta t' )
+def alpha(delta,lz = Q_('500mm').pm(1),t = Q_('79delta_degC' ).pm(0.1)):    
+    return delta/(lz*t)
+
+print(alpha(Q_('0.87mm').pm(0.01)))
+#print(spez.__defaults__)
+#print(type(spez(Q_('325g').pm(.1),Q_('25.7K').pm(.1),Q_('20.6K').pm(0.1))))
+#print(type(Q_('325g').pm(.1)))
+
+eins = np.array([30.68,60.6/2,30.87,59.5/2])
+
+def spaltbreite(d, ordnung = 1, error = 0):
+    a = 5 #meter
+    m = ordnung
+    d = u(d*10**-3, error*10**-3)
+    lamm = 632.8*10**-9
+    b = (2*m*lamm*a)/d
+    return b
+#print(spaltbreite(30.4, error=0.25))
+

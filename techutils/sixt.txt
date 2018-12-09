@@ -1,0 +1,39 @@
+aus = add(np.array([1235/7, 714/5, 980/8.5, 855/8.5, 400/5, 348/5]), - 2172/50)
+d = np.arange(0,6) * 5
+fit = np.polyfit(d,np.log(aus),1)#w = np.square(aus))
+fit_f = np.poly1d(fit)
+
+plt.errorbar(d,aus, yerr = np.sqrt(aus), ecolor = 'black',fmt='ro', capsize = 3)
+#plt.plot(d,aus,'o', color = 'orange')         
+plt.plot(d, np.e**fit_f(d), color = 'orange')
+
+plt.yscale('log')
+
+plt.xlabel('Abstand $d$ in mm')
+plt.ylabel('N(d) pro Minute')
+
+
+N0 =    2172/(50*60)
+R1 = np.array([71.7,59.7])
+N1 = add(np.array([853/600,573/300]),-N0 )/(614/60 -N0)
+R2 = [41.5, 34.6,28.8,24.,20.,49.8,86.]
+N2 = add(np.array([862/300,437/120, 602/120, 781/120, 1152/120, 638/300, 761/600]),-N0 )/(1152/120 -N0)
+t = np.array([600,300,300,120,120,120,120,300,600])
+R = np.array(list(R1)+list(R2))
+N = np.array(list(N1)+list(N2)) 
+
+#filt = lambda X: [1 if x>30 else 0 for x in X]
+
+fit = np.polyfit(np.log(R),np.log(N),1)#,w = filt(R))
+fit_f = np.poly1d(fit)
+er = np.sqrt(N*t*10)/(t*10)
+er[-3]=0
+plt.errorbar(R,N, yerr = er, ecolor = 'black',fmt='r.', capsize = 3)
+newx =np.linspace(np.log(20),np.log(90))
+        
+plt.plot(np.e**newx, np.e**fit_f(newx), color = 'orange')
+
+plt.yscale('log')
+plt.xscale('log')
+plt.xlabel('Abstand $d$ in cm')
+plt.ylabel('N(d)/N(20)')
