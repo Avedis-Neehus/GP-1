@@ -30,19 +30,25 @@ def errify(entity, *varnames, **cnames):
         
         def function(*args):
             
-            symargs   = tuple([sym.Symbol(varname) for varname in varnames])
-            symkwargs = dict((key,sym.Symbol(val)) for key,val in cnames.items())
-            symall = symargs+tuple(symkwargs.values())
+            argspec =  inspect.getfullargspec(f)
+            def_args = argspec.args[:-len(argspec.defaults)] if argspec.defaults else argspec.args
+            def_kwargs = argspec.args[-len(argspec.defaults):] if argspec.defaults else {}
+            
+            
+            symargs   = tuple(sym.Symbol(varname)  for varname in varnames)  if varnames else tuple(sym.symbols(def_args))
+            symkwargs = tuple(sym.Symbol(cname) for cname in cnames.values())if cnames   else tuple(sym.symbols(def_kwargs))
+            symall = symargs+symkwargs
+            
             allarg = args+f.__defaults__
             
-            print(symall,allarg)
+            #print(symall,allarg)
            # argindex = [ i for i in range(args) if hasattr(args[i], 'std_dev')]
             symprecise = [symbol for symbol,arg in zip(symall,allarg) if hasattr(arg, 's')]
             inprecise = [arg for arg in allarg if hasattr(arg, 's')]
             #syment    = sym.symbols(entity)#(*inprecise) 
            
             
-            expr = f(*symargs, **symkwargs)
+            expr = f(*symall)#, **symkwargs)
             value = f(*args)
             derivatives = [expr.diff(symbol) for symbol in symprecise]
             
@@ -73,7 +79,7 @@ def errify(entity, *varnames, **cnames):
                 print(arg, end = ',')
             print(' \\right)')# '& =' )   
                       
-            #print(r'\sqrt{', end = '')
+            print(r'\sqrt{', end = '')
             
             #for  val,error in zip(inprecise,value.error_components().values()) :
                                   
@@ -84,7 +90,7 @@ def errify(entity, *varnames, **cnames):
             print(r'\end{align*}')
             
         return function 
-    return   deco          
+    return   deco            
         
         
         
