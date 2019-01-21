@@ -1,0 +1,87 @@
+
+I =  [[4,7,10,13,16,20,23,26,30,34], 
+      [65,83,94,105,116,125,135,145,154,164,171,180,188,197,204,213,221,227,234,241,249,256,262,270],
+      [3,6,9,13,17,21,26,31,37,44]]
+
+U = [[60,107,159,201,251,302,356,401,454,507],
+     [55,102,153,202,253,300,350,403,453,506,547,597,648,698,748,
+     800,854,895,947,995,1057,1099,1149,1200],
+     [54,106,156,205,258,304,358,403,452,505]]
+     
+X = list([ list(0.5+i*0.5 for i,_ in enumerate(V)) for V in U])
+
+Uc = np.array([1050,820,670,530,420,340,270,220,180,140,120,95,80,62,51,41,34,
+               27,21,11,15,13,11,9,8,7,5,5,4,4,3,3,3,2,2,2,2,2,1,1,1])*10**-2
+t =     np.array([0+i*6 for i,_ in enumerate(Uc)])
+
+Ro = 0.1*np.array(U[0])/np.array(I[0])
+print(np.std(Ro, ddof = 1),np.mean(Ro))
+def func(t,a):
+    return 10.5*np.exp(-t/a)
+
+@techutil()
+def P(U = Q_('12V').pm(0.104),I = Q_('27mA').pm( 1.34)):
+    return I*U
+
+@techutil()
+def R(U = Q_('12V').pm(0.104),I = Q_('27mA').pm( 1.34)):
+    return U/I
+    
+def UoverT(): 
+    
+    Uerr = Uc*0.02 + 0.08
+    Urel = Uerr/sum(Uerr)
+    popt, pcov = curve_fit(func, t, Uc)#, sigma = Uerr, absolute_sigma = 1)
+    print(popt,pcov)
+    chi = sum( (uc-func(t,*popt))**2 for uc,t,urel in zip(Uc,t,Urel))
+    print(chi,np.sqrt(chi/(len(t))))
+    plt.errorbar(t,Uc,fmt = '.', yerr = Uerr, color = 'black', capsize = 2)    
+    plt.plot(t, func(t,*popt), color = 'red')
+    
+    plt.xlabel('Zeit t in s')
+    plt.ylabel('Spannung U in V')
+    print(StandartError(func,t,Uc,popt), ChiSquare(func,t,Uc,popt)**2)
+#UoverT()    
+def dezimalProj(num, dig):
+     return float(str(num)[dig+1])*10**-dig
+ 
+  
+def IoverU0():
+    for x,i  in zip(X,I):    
+       
+        i = np.array(i[:10])*1/10
+        x = x[:10]        
+        plt.plot(x,i, 'x')
+        
+        plt.errorbar(x[5],i[5], yerr = i[5] * 0.02 + 0.8, xerr = x[5] * 0.02 + 0.08 , capsize = 2, color = 'black')
+        
+    plt.legend(['Ohm','Lampe','VDR'])
+    plt.xlabel('Spannung U in V')
+    plt.ylabel(r'Stromstärke I in mA')
+#IoverU0()  
+@listify 
+def Rerror(U,I):
+    return (((U*0.02+0.08)/I)**2+((U*(I*0.02 +0.8))/I**2)**2)**0.5
+
+def Rlamp(i = 1):
+    
+    yerr = Rerror(np.array(U[i])*0.01,np.array( I[i])*0.1)
+   # plt.plot(np.array(I[i])*0.1,0.1*np.array(U[i])/np.array(I[i]),'y.-')
+    plt.errorbar(np.array(I[i])*0.1,0.1*np.array(U[i])/np.array(I[i]),fmt = 'y.',yerr = yerr ,xerr = np.array(I[i])*0.1*0.02+0.8, capsize = 2 )
+    plt.xlabel('Stromstärke I in mA')
+    plt.ylabel(r'Widerstand R in $k \Omega$')
+#Rlamp()    
+    
+def VDR():
+    
+    plt.errorbar(X[2],0.1*np.array(U[2])/np.array(I[2]), fmt = 'gx',
+                 yerr = ((0.02*0.1*np.array(U[2])) + 0.08)/np.array(I[2]), xerr = np.array(U[2])*0.01*0.02+0.08, capsize = 3 )
+    plt.xlabel('Spannung U in V')
+    plt.ylabel(r'Widerstand R in $k \Omega$')
+#VDR()    
+T = quant( [28 ,59  ,  18.5 , 87   ], unit = 's', err = 0.6)
+#tabelize([U[0],0.1*np.array(U[0])/np.array(I[0])])
+@techutil(tau ='T_{1/2}', R ='R')
+#@listify 
+def C(tau = Q_('87s').pm(0.6), R = Q_('1Mohm').pm(0.01)):
+    return tau/(R*np.log(2))    

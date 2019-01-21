@@ -1,3 +1,4 @@
+
 FeWT=  4*[21.0]   
 FeWt = [i/2 for i,_ in enumerate(FeWT)]
 
@@ -57,17 +58,17 @@ lit = np.array([2.31,1.85, 1.18, 1.65])
 dehn = np.array([deltas, alphas, lit, grun])
 
 
-tabelize(dehn.T, rowlab = ['Aluminium', 'Messing', 'Eisen','Kupfer'], collab = ['',r'$\delta l$ in $mm$', r'\alpha in $10^{-5}$°$C^{-1}$', 'Literaturwert', r'$\alpha T_s$']) 
+#tabelize(dehn.T, rowlab = ['Aluminium', 'Messing', 'Eisen','Kupfer'], collab = ['',r'$\delta l$ in $mm$', r'\alpha in $10^{-5}$°$C^{-1}$', 'Literaturwert', r'$\alpha T_s$']) 
 
-       
+yerr   = 0.1
 def Al():
     
     waterfit = np.poly1d(np.polyfit(AlWt,AlWT,1))
     mixfit = (np.poly1d(np.polyfit(Alt[9:],AlT[9:],1)))
 
     plt.plot(np.arange(0,9), waterfit(np.arange(0,9)),'b--',np.arange(8,13),mixfit(np.arange(8,13)),'r--')
-    plt.plot(AlWt,AlWT,'bo',label = 'Wassertemperatur')
-    plt.plot(Alt, AlT, 'ro', label = 'Mischtemperatur')
+    plt.errorbar(AlWt,AlWT,fmt ='bo',label = 'Wassertemperatur', yerr = yerr, capsize = 2)
+    plt.errorbar(Alt, AlT, fmt ='ro', label = 'Mischtemperatur',yerr = yerr,capsize = 2)
     
     plt.title('Aluminium')
     plt.text(9.8,34.5, r'$ \overline{t} = 35.1$', color = 'red')
@@ -90,8 +91,8 @@ def Ms():
     plt.text(6,28, r'$ T_w = 27.9$', color = 'blue')
     plt.text(5.5,30.5, r'$\overline{t} =  31.2$', color = 'red')
     plt.plot(np.arange(0,5), waterfit(np.arange(0,5)),'b--',np.arange(4,8),mixfit(np.arange(4,8)),'r--')
-    plt.plot(MsWt,MsWT,'bo',label = 'Wassertemperatur')
-    plt.plot(Mst, MsT, 'ro', label = 'Mischtemperatur')
+    plt.errorbar(MsWt,MsWT,fmt ='bo',label = 'Wassertemperatur',yerr = yerr,capsize = 2)
+    plt.errorbar(Mst, MsT, fmt ='ro', label = 'Mischtemperatur',yerr = yerr,capsize = 2)
     plt.xlabel('Zeit $t$ in Minuten')
     plt.ylabel('Temperatur $T$ in °C')
     plt.legend(loc='upper left')
@@ -110,8 +111,8 @@ def Cu():
     plt.text(7,25.25, r'$ T_w = 25.2$', color = 'blue')
     plt.text(7.25,28, r'$\overline{t} =  28.3$', color = 'red')
     plt.plot(np.arange(0,5), waterfit(np.arange(0,5)),'b--',np.arange(4,10),mixfit(np.arange(4,10)),'r--')
-    plt.plot(CuWt,CuWT,'bo',label = 'Wassertemperatur')
-    plt.plot(Cut, CuT, 'ro', label = 'Mischtemperatur')
+    plt.errorbar(CuWt,CuWT,fmt ='bo',label = 'Wassertemperatur',yerr = yerr,capsize = 2)
+    plt.errorbar(Cut, CuT, fmt ='ro', label = 'Mischtemperatur',yerr = yerr,capsize = 2)
     plt.xlabel('Zeit $t$ in Minuten')
     plt.ylabel('Temperatur $T$ in °C')
     plt.legend(loc='center right')
@@ -130,8 +131,10 @@ def Fe():
     
     plt.axvline(2.2,color = 'gray', linestyle = '--')
     
-    plt.plot(FeWt,FeWT,'bo',label = 'Wassertemperatur')
-    plt.plot(Fet, FeT, 'ro', label = 'Mischtemperatur')
+    plt.errorbar(FeWt,FeWT,fmt ='bo',label = 'Wassertemperatur',yerr = yerr,capsize = 2)
+    plt.errorbar(Fet, FeT, fmt ='ro', label = 'Mischtemperatur',yerr = yerr,capsize = 2)
     plt.xlabel('Zeit $t$ in Minuten')
     plt.ylabel('Temperatur $T$ in °C')
     plt.legend(loc='lower right')
+
+#spez = np.array(list(614/60 -N0 if i <= 1  else 1152/120 -N0 for i,_ in enumerate(N)))

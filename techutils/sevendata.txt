@@ -1,0 +1,54 @@
+arror = 1
+gerr = 23
+
+@errify(r'lambda') 
+#@listify
+def lambdas(x, 
+        a = Q_('83cm').pm(arror), 
+        g = Q_('1808nm').pm(gerr)):
+    
+    return (g*x)/(x**2+a**2)**0.5
+
+@listify
+#@errify('g','x',r'\lambda')    
+def gitter(x,l, 
+        a = Q_('83cm').pm(arror)):
+    
+    return (l*(x**2+a**2)**0.5)/x  
+
+@listify
+def rydberg(l,m):
+    return (1/l)*(1/4 -1/m**2)**-1
+
+He_l =   quant([447.15,471.31,492.19,501.57,587.56,667.81,706.52], unit = 'nm')  
+
+data =np.array([ [416,398,390,384,339,291,269],[840,849,862,864,908,951,972],
+                 [415,401,392,388,341,296,274],[842,853,864,870,912,957,978], 
+                 [417,404,394,389,344,301,279],[841,850,862,866,913,955,976]])
+    
+ 
+xleft = data.T[:,[0,2,4]]    
+xright = data.T[:, [1,3,5]]    
+
+xs = (xright-xleft)/2
+
+x = quant(mean(xs), unit = 'mm', err = 5)
+
+g = gitter(x, He_l)
+gtable = np.array([x.magnitude.n,He_l.magnitude,g.magnitude]).T
+#tabelize(gtable, collab = [r'$x \pm$ in mm', r'\lambda in nm', r'$g \pm$ in nm'])
+
+
+
+Hdata =  np.array([[407,384,288],[829,857,946],
+          [400,380,288],[831,857,946],
+          [408,383,287],[824,854,949]])  
+H_l = quant([434,486,656], unit = 'nm') 
+xleft = Hdata.T[:,[0,2,4]]    
+xright = Hdata.T[:, [1,3,5]]    
+
+xs = (xright-xleft)/2
+x = quant(mean(xs), unit = 'mm', err = 3)  
+l = lambdas(x[0])    
+#htable = np.array([x.magnitude.n,l.magnitude,H_l.magnitude]).T
+#tabelize(htable, collab = [r'$x \pm$ in mm', r

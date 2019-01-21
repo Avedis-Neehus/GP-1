@@ -1,0 +1,26 @@
+T = quant([10,10,10,25,10,10,10], unit = 'dimensionless', err = 0.5)
+t = quant([4,2.5,1.8,4,2.5,4,5], unit = 'dimensionless', err = 0.5)
+
+
+b = quant([21,21,22,22,18,21,20], unit = 'dimensionless', err = 0.5)
+yb = quant([12,18.5,8,8,18,7,0.1], unit = 'dimensionless', err = 0.5)
+
+@listify
+#@techutil('T', r'\Delta t',  fname = r'\phi')
+def phi(T,t):
+    return 2*np.pi*t/T
+
+
+@listify
+#@techutil('b', 'y_b', fname = r'\phi')
+def phi2(b,yb):
+    return umath.asin(yb/b)
+
+#phi2.tex(b[0],yb[0])   
+print(phi(T.mag,t.mag), phi2(b.mag,yb.mag))
+#spez = np.array(list(614/60 -N0 if i <= 1  else 1152/120 -N0 for i,_ in enumerate(N)))
+rowlab = [str(i) for i in np.arange(7,15) if not(i == 10)]
+colab = ['track', r'$T \pm 0.5$  SK', r'$\Delta t \pm 0.5$ SK', r'$\phi$ ']
+collab = ['track', r'$b \pm 0.5$  SK', r'$y_b \pm 0.5$ SK', r'$\phi$' ]
+tabelize(np.array([T.mag.n,t.mag.n, phi(T.mag,t.mag)]).T , rowlab = rowlab, collab = colab)
+tabelize(np.array([b.mag.n,yb.mag.n, phi2(b.mag,yb.mag)]).T, rowlab = rowlab, collab = collab)
