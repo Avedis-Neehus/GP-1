@@ -34,7 +34,9 @@ def listify(f):
         return attriList(map(lambda *arg : f(*arg,**kwargs), *args))
     
     return wrapping
-
+@listify    
+def quant(val, unit ='', err = None):
+    return Q_(str(val)+unit).pm(err) if err else Q_(str(val)+unit)
    
 class mpi:
     '''Switches behavior between symp and numpy functions/constants, which is needed for correct behavior of errify and
@@ -132,7 +134,7 @@ def texify( *varnames,fname = None, **cnames):
             print('&=' + sym.latex(numexpr, mul_symbol = 'dot') + '=', end = '')
            # try:
             result = f(*args)
-            print( '{:Lx.02f}'.format(result.value))
+            print( '{:Lx.02f}'.format(result))
             #except: pass
             print('\\end{align*}')
             
@@ -379,181 +381,30 @@ def sigma(li, n = None, dig = 1 ):
     else:
         return int(val)
 
-
-T1 = np.array([[878,650,550,575,653,765,907],
-               [888,644,550,569,647,769,897],
-               [890,644,547,578,659,759,900]])*10**-3
-    
-T2 = np.array([[958,831,700,594,534,534,597,694],
-               [971,831,703,597,538,534,594,697],
-               [972,842,694,597,541,534,590,690]])*10**-3
-    
-T1 = (T1[0]+T1[1]+T1[2] )/3
-T1 = T1[2:]
-l1 = np.arange(0,5)
-l2 = np.arange(-7,1)
-mz = Q_('172.2g').pm(0.1)
-mk = Q_('182.2g').pm(0.1)
-
-def f(x,a,b):
-    return a + b*x
-
-popt, pcov = curve_fit(f, l1**2, T1**2,absolute_sigma = 1, sigma = [2*t*0.006 for t in T1] )
-print(Rsquare(f, l1**2, T1**2, popt),ChiSquare(f, l1**2, T1**2, popt) )
-#plt.errorbar(l1**2,T1**2, yerr = [2*t*0.006 for t in T1], fmt = 'g3', capsize = 3)   
-l1 = np.linspace(0,17) 
-#plt.plot(l1, f(l1,*popt))
-plt.xlabel('$a$ in cm ')
-plt.ylabel('$T$ in s')
-    
-b =  Q_(str(popt[1])+'s**2/cm**2').pm(pcov[1][1]**0.5)
-a =  Q_(str(popt[0])+'s**2').pm(pcov[0][0]**0.5)
-@techutil(fname = 'D^{*}',b = 'B',mz = 'm_z')
-def D(b = b, mz = mz):
-    return 4*np.pi**2*mz*1/b
-
-@techutil(fname = 'I_z',r ='R',mz ='m_z')
-def iz(r=Q_('5.19/2cm').pm(0.05), mz = mz):
-    return 1/2 * mz * r**2
-
-@techutil(fname ='I_t', a = 'A', d = 'D', iz = 'I_z')
-def It(a  =  a,d = D().to('m**2*g*s**-2'),iz = iz().to('g*m**2')):
-    return (1/(4*np.pi**2))*a*d-iz
-
-@techutil(fname = 'I_p',T = 'T_{min}', D ='D^{*}', it = 'I_t' )
-def minna(T = Q_('0.529s').pm(0.004) ,D = D().to('m**2*g*s**-2'),it = It()):
-    return T**2*(D/(4*pi**2))-sin(pi/2)*it*pi
-minna.tex()
-
 if 0:
-    def f2(l,ik,):
-        l = 0.01*(l+2.5057)*ur.meter
-        ik = ik*It().units
-        return (2*np.pi*np.sqrt(1/D().value.to_base_units() *(ik.to_base_units()+It().value.to_base_units()+mk.value.to_base_units()*l**2))).magnitude 
+    d = Q_('1mm')
     
-    def f3(l,a,b,c,d):
-       return a*(l-b)**2+ c*(l-b)**4 +d
+    Bp1 = Q_('1200mT').pm(5) #15V Abstandfehler 50
+    gepI1=quant([35,22,8,49,15,29,43], unit = 'mA') #mA
+    gepU1= quant([26,21,16,30,18,23,28], unit = 'V')#*0.1 #V
     
-    def f4(l,ik,o, m):
-        l = 0.01*(l-o)*ur.meter
-        ik = ik*It().units
-        m = (m*mk.units).pm(0.1)
-        return (2*np.pi*np.sqrt(1/D().value.to_base_units() *(ik.to_base_units()+It().value.to_base_units()+m.value.to_base_units()*l**2))).magnitude#, p0 = [0.1,-2.5,181]
-    if 1:
-        T2 =  np.sum(T2, axis=0) /3  
-        papt,pacov  = curve_fit(f3,l2, T2,absolute_sigma = 1, sigma = [0.006]*len(l2), p0 = [0.3,-2.5,0.01,0.04])
-        popt, pcov = curve_fit(f2,l2, T2,absolute_sigma = 1, sigma = [0.006]*len(l2))#, p0 = [0.3,-2.5,0.01,0.04])
-        pipt, picov = curve_fit(f4,l2, T2,absolute_sigma = 1, sigma = [0.006]*len(l2), p0 = [0.1,-2.5,181])
-        
-        print(SE(f2, l2, T2, popt),ChiSquare(f2, l2, T2, popt) )
-        print(SE(f3, l2, T2, papt),ChiSquare(f3, l2, T2, papt) )
-        print(SE(f4, l2, T2, pipt),ChiSquare(f4, l2, T2, pipt) )
-        
-        plt.errorbar(l2,T2, yerr = 0.006, fmt = 'g.', capsize = 3, label = 'Messwerte')   
-        l2 = np.linspace(-7,1)
-       # plt.plot(l2, f2(l2,*popt), label = 'Wurzelfit')
-        plt.plot(l2, f3(l2,*papt),'r--', label = 'Polynomfit')
-        plt.legend()
+    Bp2 = Q_('753mT').pm(5)#10V
+    gepI2= quant([8,15,22,29,36,43,49], unit = 'mA') #mA
+    gepU2 =quant([13,15,18,19,21,23,24], unit = 'V')#*0.1 #V 
     
-        
-        
-    @techutil()
-    def g(l = l,T =T,r=r,ol=ol,ok=ok,mu=mu,m=m,phi=phi):
-        return (1+2*(r/l)**2/5+ol/ok-mu/(6*m)+phi**2/8)
+    Bn1 = Q_('1185mT').pm(5)#15V
+    GenI1 = quant([1,8,15,22,29,36,43,50], unit = 'mA')#mA
+    GenU1 = quant([43,51,60,68,76,85,92,100], unit = 'V')#*0.1#V
+    
+    Bn2 = Q_('815mT').pm(5)#10
+    GenI2 = quant([1.5,8,16,22,31,36,43,49], unit = 'mA')#mA
+    GenU2 = quant([34,40,47,53,61,65,71,78], unit = 'V') #V
     
     @techutil()
-    def g2(l = l,T =T):
-        return 4*np.pi**2*l/T**2
+    def Rh(B,I,U, d = d):
+        return (U*d)/(B*I)
     
-    @listify    
-    def quant(val, unit ='', err = None):
-        return Q_(str(val)+unit).pm(err) if err else Q_(str(val)+unit)  
-    
-     
-    T1 = np.array([[878,650,550,575,653,765,907],
-                   [888,644,550,569,647,769,897],
-                   [890,644,547,578,659,759,900]])*10**-3
-        
-    T2 = np.array([[958,831,700,594,534,534,597,694],
-                   [971,831,703,597,538,534,594,697],
-                   [972,842,694,597,541,534,590,690]])*10**-3
-        
-    T1 = (T1[0]+T1[1]+T1[2] )/3
-    T1 = T1[2:]
-    l1 = np.arange(0,5)
-    l2 = np.arange(-7,1)
-    mz = Q_('172.2g').pm(0.1)
-    mk = Q_('182.2g').pm(0.1)
-    
-    def f(x,a,b):
-        return a + b*x
-    
-    popt, pcov = curve_fit(f, l1**2, T1**2,absolute_sigma = 1, sigma = [2*t*0.006 for t in T1] )
-    print(Rsquare(f, l1**2, T1**2, popt),ChiSquare(f, l1**2, T1**2, popt) )
-    #plt.errorbar(l1**2,T1**2, yerr = [2*t*0.006 for t in T1], fmt = 'g3', capsize = 3)   
-    l1 = np.linspace(0,17) 
-    #plt.plot(l1, f(l1,*popt))
-    plt.xlabel('$a$ in cm ')
-    plt.ylabel('$T$ in s')
-        
-    b =  Q_(str(popt[1])+'s**2/cm**2').pm(pcov[1][1]**0.5)
-    a =  Q_(str(popt[0])+'s**2').pm(pcov[0][0]**0.5)
-    @techutil(fname = 'D^{*}',b = 'B',mz = 'm_z')
-    def D(b = b, mz = mz):
-        return 4*np.pi**2*mz*1/b
-    
-    @techutil(fname = 'I_z',r ='R',mz ='m_z')
-    def iz(r=Q_('5.19/2cm').pm(0.05), mz = mz):
-        return 1/2 * mz * r**2
-    
-    @techutil(fname ='I_t', a = 'A', d = 'D', iz = 'I_z')
-    def It(a  =  a,d = D().to('m**2*g*s**-2'),iz = iz().to('g*m**2')):
-        return (1/(4*np.pi**2))*a*d-iz
-    
-    @techutil(fname = 'I_p',T = 'T_{min}', D ='D^{*}', it = 'I_t' )
-    def minna(T = Q_('0.529s').pm(0.004) ,D = D().to('m**2*g*s**-2'),it = It()):
-        return T**2*(D/(4*np.pi**2))-it*sin(pi)*sin(pi)
-    
-    
-    def f2(l,ik,):
-        l = 0.01*(l+2.5057)*ur.meter
-        ik = ik*It().units
-        return (2*np.pi*np.sqrt(1/D().value.to_base_units() *(ik.to_base_units()+It().value.to_base_units()+mk.value.to_base_units()*l**2))).magnitude 
-    
-    def f3(l,a,b,c,d):
-       return a*(l-b)**2+ c*(l-b)**4 +d
-    
-    def f4(l,ik,o, m):
-        l = 0.01*(l-o)*ur.meter
-        ik = ik*It().units
-        m = (m*mk.units).pm(0.1)
-        return (2*np.pi*np.sqrt(1/D().value.to_base_units() *(ik.to_base_units()+It().value.to_base_units()+m.value.to_base_units()*l**2))).magnitude#, p0 = [0.1,-2.5,181]
-    if 1:
-        T2 =  np.sum(T2, axis=0) /3  
-        papt,pacov  = curve_fit(f3,l2, T2,absolute_sigma = 1, sigma = [0.006]*len(l2), p0 = [0.3,-2.5,0.01,0.04])
-        popt, pcov = curve_fit(f2,l2, T2,absolute_sigma = 1, sigma = [0.006]*len(l2))#, p0 = [0.3,-2.5,0.01,0.04])
-        pipt, picov = curve_fit(f4,l2, T2,absolute_sigma = 1, sigma = [0.006]*len(l2), p0 = [0.1,-2.5,181])
-        
-        print(SE(f2, l2, T2, popt),ChiSquare(f2, l2, T2, popt) )
-        print(SE(f3, l2, T2, papt),ChiSquare(f3, l2, T2, papt) )
-        print(SE(f4, l2, T2, pipt),ChiSquare(f4, l2, T2, pipt) )
-        
-        plt.errorbar(l2,T2, yerr = 0.006, fmt = 'g.', capsize = 3, label = 'Messwerte')   
-        l2 = np.linspace(-7,1)
-        plt.plot(l2, f2(l2,*popt), label = 'Wurzelfit')
-        plt.plot(l2, f3(l2,*papt),'r--', label = 'Polynomfit')
-        plt.legend()
-    
-        
+    print(Rh.gauß(Bp1,gepI1[0],gepU1[0]*0.1))
 
-def error(two):
-    #input list of list
     
-    mean = [np.mean(a) for a in two]
-    std = [np.std(a, ddof = 1) for a in two]
-    stdmean = np.mean(std)
-    meanerror = stdmean/np.math.sqrt(len(two[0]))
-    
-    return mean,std,stdmean,meanerror
-
-
+            
