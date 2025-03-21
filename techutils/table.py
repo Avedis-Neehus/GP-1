@@ -104,8 +104,8 @@ cos = mpi('cos')
 tan = mpi('tan')  
         
 def texify( *varnames,fname = None, **cnames): 
-    '''Decorator to print latex code for a function (function in mathematical sense). The function must be pure and consist 
-    of mathematical operations. The variables should all be pint objects. Constants have to be provided as keywordarguments, they are static.'''
+    '''Decorator to print latex code for a function. The function must be pure and consist 
+    of elementary operations. The variables should all be pint objects. Constants have to be provided as keywordarguments, they are static.'''
     def deco(f):        
         def function(*args):
             mpi.symode = 1
